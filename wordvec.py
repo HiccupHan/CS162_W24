@@ -137,11 +137,6 @@ def eudclidean_distance(v1, v2):
     # This function should work for both cases: 1) both v1 and v2 are 1-D array
     #                                        or 2) v1 is 1D array and v2 is 2D matrix for batch calculation
     
-
-    # normalized_v1 = v1 / np.linalg.norm(v1, axis=0)
-    # normalized_v2 = v2 / np.linalg.norm(v2, axis=0)
-    # return np.sqrt(np.linalg.norm(normalized_v1)**2 + np.linalg.norm(normalized_v2)**2 - 2.0 * np.matmul(normalized_v1.T, normalized_v2))
-    
     return 0
     #################################################
     
