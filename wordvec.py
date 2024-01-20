@@ -123,7 +123,7 @@ class Lexicon:
         return []
         ##################################################
 
-def eudclidean_distance(v1, v2):
+def euclidean_distance(v1, v2):
     """Calculate the normalized euclidean distance between two vectors"""
     # Params:
     #       v1, v2: numpy arrays
@@ -152,9 +152,9 @@ def main():
     log.info("Word vector of {} from {}: {}".format(args.word, args.embeddings, lexicon.get_vector(args.word)))
     
     log.info("{}\nCoding task 2: normalized euclidean distance".format("-"*10))
-    euclidean_result = eudclidean_distance(lexicon.get_vector(args.word), lexicon.get_vector("woman"))
+    euclidean_result = euclidean_distance(lexicon.get_vector(args.word), lexicon.get_vector("woman"))
     log.info("Euclidean distance between {} and {} is: {}".format(args.word, "woman", euclidean_result))
-    euclidean_result = eudclidean_distance(lexicon.get_vector(args.word), lexicon.get_vector("man"))
+    euclidean_result = euclidean_distance(lexicon.get_vector(args.word), lexicon.get_vector("man"))
     log.info("Euclidean distance between {} and {} is: {}".format(args.word, "man", euclidean_result))
 
     log.info("{}\nCoding task 3: nearest neighbors".format("-"*10))
