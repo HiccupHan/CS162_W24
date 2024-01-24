@@ -128,7 +128,7 @@ def euclidean_distance(v1, v2):
     # Params:
     #       v1, v2: numpy arrays
     # Return:
-    #       Euclidean distance, a number between 0 and sqrt(2)
+    #       Euclidean distance, a number between 0 and 2
     
     ##################################################
     # Coding Task 2
