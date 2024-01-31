@@ -4,12 +4,10 @@ Welcome to the coding part for the HW2!
 
 Example Commands:
 ```
-python language_model.py --N 2 --k 0.1
-
-python language_model.py --N 3 --backoff --lambdas 0.33 0.33 0.34 
+python language_model.py --N 2 --b True
 ```
 
-Here, the arguments N is the order of the language model and k is the parameter for smoothing.
+Here, the arguments N is the order of the language model and b is the parameter for smoothing.
 
 As part of the coding part of the homework, you need to complete all the TODO blocks divided into several tasks.
 
