@@ -74,9 +74,8 @@ class LanguageModel(object):
         ngrams = []
         for i in range(len(words)-n+1):
             # TODO: construct a ngram tuple with the first element being {words[i]}
-            
-            pass
-        
+            ngram_tuple = tuple(words[i:i+n])
+            ngrams.append(ngram_tuple)
         return ngrams
 
     def _get_ngrams_freq(self, corpus, n):
@@ -127,26 +126,32 @@ class LanguageModel(object):
         log_prob = 0.0
         # We then iterate over each ngram.
         for ngram in sent_ngrams:
-            
             if self.backoff == True and self.N!=3:
                 raise Exception("You have entered wrong combination of CLI arguments. Check again!")
             
             # Case 1: unigram model (Add k smoothing where required)
             if self.N == 1:
                 # TODO: 
-                # 1. unigram exists and k == 0
+                # 1. unigram exists and k == 0s
                 # 2. unigram does not exist or k > 0
-                
-                pass
-            
+                if self.train_ngram_freq[ngram] == 0 and self.add_k == 0:
+                    log_prob = math.nan
+                    break
+                elif self.train_ngram_freq[ngram] != 0 and self.add_k == 0:
+                    log_prob += math.log2(self.train_ngram_freq[ngram] / self.word_cnt)
+                else:
+                    log_prob += math.log2((self.train_ngram_freq[ngram] + self.add_k) / (self.word_cnt + self.add_k * self.vocab_size))
+    
             # case 2: n gram model for n > 1 (Add k smoothing where required)
             elif self.backoff == False:
                 # TODO: (you might require n minus gram here)
                 # 1. when ngram exists and add k = 0
                 # 2. when ngram exists and add k > 0
                 # 3. when ngram does not exists, add k > 0 
-                
-                pass
+                if self.train_ngram_freq[ngram] == 0 and self.add_k == 0:
+                    log_prob = math.nan
+                    break
+                log_prob += math.log2((self.train_ngram_freq[ngram] + self.add_k)/(self.train_n_minus_one_gram_freq[ngram[:self.N-1]] + self.add_k * self.vocab_size))
             
             # Case 3: special case of simple linear interpolation for a trigram (No add k smoothing here)
             elif self.backoff == True:  
@@ -155,13 +160,29 @@ class LanguageModel(object):
                 # you need to find appropriate value of lambda such that p(avg) is highest
                 # or log prob is less negative
                 # deal with 0/0 division as no add one smoothing used
-                
-                pass
+                if self.train_ngram_freq[ngram] != 0:
+                    prob_tri = self.train_ngram_freq[ngram]/self.train_n_minus_one_gram_freq[(ngram[:2])]
+                else:
+                    prob_tri = 0
+
+                if self.train_n_minus_one_gram_freq[(ngram[1:])] != 0:
+                    prob_bi = self.train_n_minus_one_gram_freq[(ngram[1:])]/self.vocab[ngram[1]]
+                else:
+                    prob_bi =  0
+
+                if  self.vocab[ngram[2]] != 0:
+                    prob_uni = self.vocab[ngram[2]]/self.word_cnt
+                else:
+                    prob_uni = 0
+
+                if self.lambdas[0] * prob_tri + self.lambdas[1] * prob_bi + self.lambdas[2] * prob_uni == 0:
+                    pass
+                else:
+                    log_prob += math.log2(self.lambdas[0] * prob_tri + self.lambdas[1] * prob_bi + self.lambdas[2] * prob_uni)
 
         cnt_ngrams = len(sent_ngrams)
         # TODO: compute sentence-level perplexity
-        
-        perplexity = None
+        perplexity = math.pow(2, -(log_prob / cnt_ngrams))
         return perplexity, log_prob, cnt_ngrams
 
 
@@ -190,8 +211,7 @@ class LanguageModel(object):
        
         # TODO: compute corpus-level perplexity. The equation should be almost the same to 
         #       sentence-level perplexity.
-            
-        perplexity = None
+        perplexity = math.pow(2, -(corpus_log_prob/corpus_cnt_ngrams))
         return perplexity
         
     def greedy_search(self, max_steps=50):
@@ -224,7 +244,10 @@ class LanguageModel(object):
                     ngram = tuple(words[-self.N+1:] + [word])
                 # TODO: given the n-gram, we retrieve its frequency in the training data.
                 #       We update {next_word} and {next_max_freq} under certain conditions.
-                pass
+                if self.train_ngram_freq.get(ngram, 0) > next_max_freq:
+                    next_max_freq = self.train_ngram_freq.get(ngram, 0)
+                    next_word = word
+
             if next_word is None:
                 break
             words.append(next_word) 
