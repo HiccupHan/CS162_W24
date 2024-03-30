@@ -92,7 +92,7 @@ class POSTagger():
 
         for tag_bigram in self.tag_bigram_cnt:
             prev_tag, curr_tag = tag_bigram
-            tran_prob[tag_bigram] = None # TODO: replace None
+            tran_prob[tag_bigram] = self.tag_bigram_cnt[tag_bigram]/self.tag_unigram_cnt[prev_tag] # TODO: replace None
         return tran_prob
 
     def compute_emis_prob(self):
@@ -109,7 +109,7 @@ class POSTagger():
         # here the bigram would be (word, tag) and unigram (tag)
 
         for tag, word in self.tag_word_cnt:
-            emis_prob[(tag, word)] = None # TODO: replace None
+            emis_prob[(tag, word)] = self.tag_word_cnt[(tag, word)]/self.tag_unigram_cnt[tag] # TODO: replace None
 
         return emis_prob
 
@@ -121,8 +121,7 @@ class POSTagger():
         """
         # this is a simplified case of transmission probability where we know 
         # the first tag is <bos> and the next tag can be any other tag in the corpus
-
-        tag_init_prob = None # TODO: replace None
+        tag_init_prob = self.tag_bigram_cnt[("<bos>", tag)]/self.tag_unigram_cnt["<bos>"]# TODO: replace None
         return tag_init_prob
 
     def viterbi(self, sent):
@@ -158,11 +157,12 @@ class POSTagger():
                     best_prev_tag = '.'
                     for prev_tag in self.all_tags:
                         # TODO remove continue and set curr_value, best_prev_tag_value, best_prev_tag values
-                        continue
-
-                    V[(tag, step)] = None # TODO replace None
-                    backtrack[(tag, step)] = None # TODO replace None
-
+                        curr_val = V[(prev_tag, step - 1)] * self.tran_prob[(prev_tag, tag)] * self.emis_prob[(tag, word)]
+                        if curr_val > best_prev_tag_value:
+                            best_prev_tag_value = curr_val
+                            best_prev_tag = prev_tag
+                    V[(tag, step)] = best_prev_tag_value
+                    backtrack[(tag, step)] = best_prev_tag
         
         prev_tag = None
         max_prob = 0
@@ -175,9 +175,10 @@ class POSTagger():
 
         pos_tag = [prev_tag]
         # TODO write a for loop to get the pos tag sequence, think which end of the sentence you should start from
-
+        for step in range(len(sent) - 1, 0, -1):
+            pos_tag.append(backtrack[(pos_tag[-1], step)])
+        
         pos_tag = pos_tag[::-1]
-
         return pos_tag
                         
 
